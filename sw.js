@@ -1,6 +1,6 @@
 /* Delegate Real Estate — offline support. Change the version to force an update. */
-const CACHE = "delegate-v2";
-const SHELL = ["./", "index.html", "listings.js", "logo.jpg", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "manifest.webmanifest"];
+const CACHE = "delegate-v3";
+const SHELL = ["./", "index.html", "demo-listings.js", "listings.js", "logo.jpg", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "manifest.webmanifest"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));
@@ -14,20 +14,23 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
-/* Serve from cache at once, refresh the cache from the network in the background. */
+/* The property list and photos: newest from the network, cached copy when offline.
+   Everything else: cached copy at once, refreshed in the background. */
 self.addEventListener("fetch", (e) => {
   const req = e.request;
-  if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== "GET" || url.origin !== location.origin) return;
+  const fresh = /\/(listings\.js|photos\/[^/]+)$/.test(url.pathname);
   e.respondWith(
     caches.open(CACHE).then(async (cache) => {
       const hit = await cache.match(req);
-      const fresh = fetch(req)
+      const net = fetch(fresh ? new Request(req.url, { cache: "no-cache" }) : req)
         .then((res) => {
           if (res && res.ok) cache.put(req, res.clone());
           return res;
         })
-        .catch(() => hit);
-      return hit || fresh;
+        .catch(() => hit || Response.error());
+      return fresh ? net : hit || net;
     })
   );
 });

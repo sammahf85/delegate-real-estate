@@ -117,6 +117,7 @@ textarea.field{min-height:96px;resize:vertical}
 .card .open:focus-visible{outline:2px solid var(--gold-hi);outline-offset:-2px}
 .art{position:relative;aspect-ratio:16/9;background:linear-gradient(180deg,#13294a,#050d18);color:var(--gold)}
 .art svg{width:100%;height:100%}
+.art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .tags{position:absolute;left:10px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
 .tag{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;padding:4px 9px;border-radius:999px;background:rgba(0,9,18,.82);border:1px solid var(--line);color:var(--gold-hi)}
 .tag.solid{background:var(--gold);color:#1a1205;border-color:var(--gold);font-weight:600}
@@ -207,6 +208,25 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 #toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);transform:translateX(-50%);z-index:95;
   background:var(--gold);color:#1a1205;font-weight:600;padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
 #toast.on{opacity:1}
+/* Manage listings */
+.mbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:6px}
+.mlist{display:grid;gap:10px;margin-top:18px}
+.mrow{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;flex-wrap:wrap}
+.mrow .thumb{position:relative;width:74px;aspect-ratio:16/11;border-radius:8px;overflow:hidden;background:linear-gradient(180deg,#13294a,#050d18);color:var(--gold);flex:none}
+.mrow .thumb svg{width:100%;height:100%}
+.mrow .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mrow .info{flex:1;min-width:150px}
+.mrow .info b{display:block;font-weight:500;line-height:1.3}
+.mrow .info span{color:var(--muted);font-size:.84rem;font-variant-numeric:tabular-nums}
+.mrow .acts{display:flex;gap:8px}
+.btn.sm{min-height:40px;padding:0 14px;font-size:.9rem}
+.btn.danger{background:transparent;color:#ff9d8a;border-color:rgba(255,157,138,.4)}
+.pill{display:inline-block;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1px dashed var(--line);color:var(--muted);margin-left:6px;vertical-align:middle}
+.notice{border:1px solid var(--gold);background:rgba(217,169,78,.09);border-radius:12px;padding:12px 14px;margin-top:14px;color:var(--text)}
+.check{display:flex!important;grid-template-columns:none;align-items:center;gap:10px;color:var(--text)!important;font-size:.95rem!important}
+.check input{width:20px;height:20px;accent-color:var(--gold)}
+.okmsg{color:var(--ok);font-size:.9rem;min-height:1.2em}
+.photo-prev{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;border:1px solid var(--line)}
 footer{margin-top:36px;padding:20px 0 0;border-top:1px solid var(--line);color:var(--muted);font-size:.84rem;text-align:center}
 
 @media (max-width:420px){
@@ -401,10 +421,48 @@ footer{margin-top:36px;padding:20px 0 0;border-top:1px solid var(--line);color:v
     </div>
   </div>
 
+  <!-- MANAGE (owner area, opened with #manage) -->
+  <div class="view" id="v-manage">
+    <div class="wrap">
+      <div class="page-title"><p class="eyebrow">Owner area</p><h1>Manage listings</h1></div>
+      <p class="count" id="mStatus"></p>
+      <div class="mbar">
+        <button class="btn" type="button" id="mAdd">Add a property</button>
+        <button class="btn ghost" type="button" id="mDelDemo">Delete all demo listings</button>
+        <button class="btn ghost" type="button" id="mEmpty">Start an empty list</button>
+        <button class="btn ghost" type="button" id="mRestore">Restore demo listings</button>
+      </div>
+      <div class="notice" id="mDraft" hidden>You have changes saved on this device only. Publish them so every visitor sees them.</div>
+      <div class="mlist" id="mList"></div>
+      <div class="two">
+        <div class="panel">
+          <h2>Publish to all visitors</h2>
+          <div class="form">
+            <label for="gTok">GitHub access token
+              <input class="field" id="gTok" type="password" autocomplete="off" spellcheck="false" placeholder="Paste once. It stays on this device."></label>
+            <button class="btn block" type="button" id="mPublish">Publish now</button>
+            <p class="err" id="pErr" role="alert"></p>
+            <p class="okmsg" id="pOk" role="status"></p>
+            <p class="note">The token lets this device save the list to your GitHub project. Create it in GitHub under Settings, Developer settings, Fine-grained tokens, for the delegate-real-estate project only, with Contents set to Read and write.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Other options</h2>
+          <div class="form">
+            <button class="btn ghost block" type="button" id="mDiscard">Discard unpublished changes</button>
+            <button class="btn ghost block" type="button" id="mDownload">Download the list file</button>
+            <button class="btn ghost block" type="button" id="mForget">Remove the token from this device</button>
+            <p class="note">Without a token, download the list file and upload it to your GitHub project as listings.js.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="wrap">
     <footer>
       <p>Delegate Real Estate · Majdalyoun, Sidon, Lebanon · +961 3 756 468</p>
-      <p>© <span id="yr">2026</span> Delegate Real Estate. All rights reserved.</p>
+      <p id="copyLine">© <span id="yr">2026</span> Delegate Real Estate. All rights reserved.</p>
     </footer>
   </div>
 </main>
@@ -439,14 +497,74 @@ footer{margin-top:36px;padding:20px 0 0;border-top:1px solid var(--line);color:v
   </div>
 </dialog>
 
+<dialog id="editDlg" aria-labelledby="edTitle">
+  <button class="iconbtn d-close" type="button" data-close aria-label="Close"></button>
+  <div class="d-body">
+    <h2 id="edTitle">Add a property</h2>
+    <div class="form">
+      <label for="pTitle">Title
+        <input class="field" id="pTitle" type="text" maxlength="90" placeholder="Sea-view apartment with terrace"></label>
+      <div class="row2">
+        <label for="pDeal">Offer
+          <select class="field" id="pDeal"><option value="sale">For sale</option><option value="rent">For rent</option></select></label>
+        <label for="pType">Type
+          <select class="field" id="pType"><option>Apartment</option><option>Villa</option><option>Land</option><option>Commercial</option></select></label>
+      </div>
+      <div class="row2">
+        <label for="pArea">Area
+          <input class="field" id="pArea" type="text" maxlength="40" list="areaList" placeholder="Majdalyoun"></label>
+        <label for="pPrice"><span id="pPriceLbl">Price (USD)</span>
+          <input class="field" id="pPrice" type="number" inputmode="decimal" min="0" step="1"></label>
+      </div>
+      <datalist id="areaList"></datalist>
+      <div class="row2">
+        <label for="pBeds">Bedrooms
+          <input class="field" id="pBeds" type="number" inputmode="numeric" min="0" step="1" value="0"></label>
+        <label for="pBaths">Bathrooms
+          <input class="field" id="pBaths" type="number" inputmode="numeric" min="0" step="1" value="0"></label>
+      </div>
+      <label for="pSize">Size (m²)
+        <input class="field" id="pSize" type="number" inputmode="decimal" min="0" step="1"></label>
+      <label for="pDesc">Description
+        <textarea class="field" id="pDesc" maxlength="600"></textarea></label>
+      <label for="pFeats">Features, separated by commas
+        <input class="field" id="pFeats" type="text" placeholder="Sea view, Parking, Generator"></label>
+      <label for="pPhoto">Photo
+        <input class="field" id="pPhoto" type="file" accept="image/*"></label>
+      <img class="photo-prev" id="pPrev" alt="Selected photo" hidden>
+      <button class="btn ghost sm" type="button" id="pNoPhoto" hidden>Remove photo</button>
+      <label class="check" for="pFeat"><input id="pFeat" type="checkbox">Show on the home page as featured</label>
+      <p class="err" id="pFormErr" role="alert"></p>
+      <button class="btn block" type="button" id="pSave">Save property</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="confirmDlg" aria-labelledby="cfTitle">
+  <div class="d-body">
+    <h2 id="cfTitle">Are you sure?</h2>
+    <p class="muted" id="cfText"></p>
+    <div class="actions">
+      <button class="btn ghost" type="button" id="cfNo">Cancel</button>
+      <button class="btn" type="button" id="cfYes">Confirm</button>
+    </div>
+  </div>
+</dialog>
+
 <div id="toast" role="status" aria-live="polite"></div>
 
+<script src="demo-listings.js"></script>
 <script src="listings.js"></script>
 <script>
 (function(){
 "use strict";
 var WA = "9613756468", PHONE_TXT = "+961 3 756 468";
-var L = window.DELEGATE_LISTINGS || [];
+var GH = { owner: "sammahf85", repo: "delegate-real-estate", branch: "main" };
+var DEMO = window.DELEGATE_DEMO || [];
+var PUBLISHED = window.DELEGATE_LISTINGS || [];
+var draft = null;
+try { var d0 = JSON.parse(localStorage.getItem("delegate.draft") || "null"); if (Array.isArray(d0)) draft = d0; } catch(e){ draft = null; }
+var L = draft || PUBLISHED.slice();
 var $ = function(id){ return document.getElementById(id); };
 var esc = function(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
 
@@ -537,6 +655,8 @@ function art(p){
   return '<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round" role="img" aria-label="' + esc(p.type) + ' illustration">' + o + '</svg>';
 }
 
+function media(p){ return p.photo ? '<img src="' + esc(p.photo) + '" alt="' + esc(p.title) + '" loading="lazy">' : art(p); }
+
 /* ---------- cards ---------- */
 function specs(p){
   var h = '';
@@ -553,7 +673,7 @@ function card(p){
   return '<article class="card">' +
     '<button class="fav" type="button" data-fav="' + esc(p.id) + '" aria-pressed="' + isSaved(p.id) + '" aria-label="Save ' + esc(p.title) + '">' + ico("heart") + '</button>' +
     '<button class="open" type="button" data-open="' + esc(p.id) + '">' +
-      '<div class="art">' + art(p) + tags(p) + '</div>' +
+      '<div class="art">' + media(p) + tags(p) + '</div>' +
       '<div class="body"><div class="price">' + priceHTML(p) + '</div><h3>' + esc(p.title) + '</h3>' +
       '<div class="where">' + ico("pin") + esc(p.area) + ' · Ref ' + esc(p.id) + '</div>' +
       '<div class="specs">' + specs(p) + '</div></div>' +
@@ -573,7 +693,7 @@ function fillSelects(){
   $("fArea").innerHTML = '<option value="">All areas</option>' + areas.map(function(a){ return '<option>' + esc(a) + '</option>'; }).join("");
   $("cats").innerHTML = TYPES.map(function(t){
     var n = L.filter(function(p){ return p.type === t; }).length;
-    var label = t === "Land" ? "Land" : t + "s";
+    var label = (t === "Land" || t === "Commercial") ? t : t + "s";
     return '<button class="cat" type="button" data-cat="' + t + '">' + ico(t) + '<span>' + label + '</span><small>' + n + (n === 1 ? ' listing' : ' listings') + '</small></button>';
   }).join("");
 }
@@ -610,6 +730,7 @@ function renderAll(){
   $("savedCount").textContent = sv.length ? sv.length + (sv.length === 1 ? " property" : " properties") + " saved on this phone" : "";
   $("savedList").innerHTML = sv.map(card).join("") || empty("Nothing saved yet", "Tap the heart on any property to keep it here.", "Browse properties", "properties");
   var b = $("badge"); b.hidden = !sv.length; b.textContent = sv.length;
+  renderManage();
 }
 
 /* ---------- detail ---------- */
@@ -618,7 +739,7 @@ function openDetail(id){
   if (!p) return;
   var msg = "Hello Delegate Real Estate, I am interested in \"" + p.title + "\" (Ref " + p.id + ") in " + p.area + ", " + (p.deal === "rent" ? "for rent at " + money(p.price) + " per month" : "for sale at " + money(p.price)) + ". Is it still available?";
   $("dContent").innerHTML =
-    '<div class="art">' + art(p) + tags(p) + '</div>' +
+    '<div class="art">' + media(p) + tags(p) + '</div>' +
     '<div class="d-body">' +
       '<div><div class="price" style="font-size:1.5rem">' + priceHTML(p) + '</div><h2 id="dTitle">' + esc(p.title) + '</h2>' +
       '<div class="where" style="margin-top:6px">' + ico("pin") + esc(p.area) + ', South Lebanon · Ref ' + esc(p.id) + '</div></div>' +
@@ -637,7 +758,7 @@ function openDetail(id){
 }
 
 /* ---------- routing: plain #name only ---------- */
-var VIEWS = ["home","properties","saved","calculator","contact"];
+var VIEWS = ["home","properties","saved","calculator","contact","manage"];
 function show(){
   var v = (location.hash || "").replace("#", "");
   if (VIEWS.indexOf(v) < 0) v = "home";
@@ -669,7 +790,7 @@ document.addEventListener("click", function(e){
     if (g === "clear"){ resetFilters(); syncFilterUI(); renderAll(); } else go(g);
   }
 });
-document.querySelectorAll("dialog").forEach(function(d){ d.addEventListener("click", function(e){ if (e.target === d) d.close(); }); });
+document.querySelectorAll("#detail,#installHelp").forEach(function(d){ d.addEventListener("click", function(e){ if (e.target === d) d.close(); }); });
 $("dealSeg").addEventListener("click", function(e){ var b = e.target.closest("button"); if (!b) return; F.deal = b.getAttribute("data-deal"); syncFilterUI(); renderAll(); });
 $("q").addEventListener("input", function(){ F.q = this.value; renderAll(); });
 $("fType").addEventListener("change", function(){ F.type = this.value; renderAll(); });
@@ -724,6 +845,196 @@ $("installTop").addEventListener("click", install);
 if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
   window.addEventListener("load", function(){ try { navigator.serviceWorker.register("sw.js").catch(function(){}); } catch(e){} });
 }
+
+/* ---------- manage listings (owner area) ---------- */
+function ask(title, text, yesLabel, onYes){
+  $("cfTitle").textContent = title; $("cfText").textContent = text; $("cfYes").textContent = yesLabel;
+  $("cfYes").onclick = function(){ $("confirmDlg").close(); onYes(); };
+  $("confirmDlg").showModal();
+}
+$("cfNo").addEventListener("click", function(){ $("confirmDlg").close(); });
+function commit(list, msg){
+  var ok = true;
+  try { localStorage.setItem("delegate.draft", JSON.stringify(list)); } catch(e){ ok = false; }
+  L = list; draft = list;
+  var keepArea = L.some(function(p){ return p.area === F.area; });
+  if (!keepArea) F.area = "";
+  fillSelects(); syncFilterUI(); renderAll();
+  toast(ok ? msg : "This device is out of storage. Publish now, or use smaller photos.");
+  return ok;
+}
+function renderManage(){
+  var demo = L.filter(function(p){ return p.sample; }).length;
+  $("mStatus").textContent = L.length + (L.length === 1 ? " property" : " properties") + " in the list" + (demo ? ", " + demo + " of them demo" : "");
+  $("mDraft").hidden = !draft;
+  $("mDelDemo").disabled = !demo; $("mEmpty").disabled = !L.length; $("mDiscard").disabled = !draft;
+  $("mList").innerHTML = L.map(function(p){
+    return '<div class="mrow"><div class="thumb">' + media(p) + '</div>' +
+      '<div class="info"><b>' + esc(p.title) + (p.sample ? '<span class="pill">Demo</span>' : '') + '</b>' +
+      '<span>' + esc(p.id) + ' · ' + esc(p.area) + ' · ' + money(p.price) + (p.deal === "rent" ? " / month" : "") + '</span></div>' +
+      '<div class="acts"><button class="btn ghost sm" type="button" data-edit="' + esc(p.id) + '">Edit</button>' +
+      '<button class="btn danger sm" type="button" data-del="' + esc(p.id) + '">Delete</button></div></div>';
+  }).join("") || '<div class="empty"><h3>The list is empty</h3><p>Add your first property, or restore the demo listings.</p></div>';
+  $("areaList").innerHTML = L.concat(DEMO).map(function(p){ return p.area; }).filter(function(a, i, arr){ return arr.indexOf(a) === i; })
+    .map(function(a){ return '<option value="' + esc(a) + '">'; }).join("");
+}
+$("mDelDemo").addEventListener("click", function(){
+  var n = L.filter(function(p){ return p.sample; }).length;
+  ask("Delete all demo listings?", n + " demo " + (n === 1 ? "listing" : "listings") + " will be removed. Your own properties stay. You can restore the demo listings later.", "Delete demo listings",
+    function(){ commit(L.filter(function(p){ return !p.sample; }), "Demo listings deleted"); });
+});
+$("mEmpty").addEventListener("click", function(){
+  ask("Start an empty list?", "All " + L.length + " properties will be removed from the list, including your own. You can restore the demo listings later.", "Empty the list",
+    function(){ commit([], "The list is now empty"); });
+});
+$("mRestore").addEventListener("click", function(){
+  var have = L.map(function(p){ return p.id; });
+  var add = DEMO.filter(function(p){ return have.indexOf(p.id) < 0; });
+  if (!add.length){ toast("All demo listings are already in the list"); return; }
+  commit(L.concat(JSON.parse(JSON.stringify(add))), add.length + " demo " + (add.length === 1 ? "listing" : "listings") + " restored");
+});
+$("mDiscard").addEventListener("click", function(){
+  ask("Discard unpublished changes?", "The list on this device goes back to the published one.", "Discard changes", function(){
+    try { localStorage.removeItem("delegate.draft"); } catch(e){}
+    draft = null; L = PUBLISHED.slice(); fillSelects(); syncFilterUI(); renderAll(); toast("Changes discarded");
+  });
+});
+$("mList").addEventListener("click", function(e){
+  var b = e.target.closest("[data-edit],[data-del]"); if (!b) return;
+  var id = b.getAttribute("data-edit") || b.getAttribute("data-del");
+  var p = L.filter(function(x){ return x.id === id; })[0]; if (!p) return;
+  if (b.hasAttribute("data-edit")) openEditor(p);
+  else ask("Delete this property?", p.title + " (" + p.id + ") will be removed from the list.", "Delete", function(){
+    commit(L.filter(function(x){ return x.id !== id; }), "Property deleted");
+  });
+});
+
+var editing = null, editPhoto = "";
+function nextId(){
+  var max = 200;
+  L.concat(DEMO, PUBLISHED).forEach(function(p){ var m = /(\d+)$/.exec(p.id || ""); if (m && +m[1] > max) max = +m[1]; });
+  return "DR-" + (max + 1);
+}
+function showPhoto(){ $("pPrev").hidden = !editPhoto; $("pNoPhoto").hidden = !editPhoto; if (editPhoto) $("pPrev").src = editPhoto; else $("pPrev").removeAttribute("src"); }
+function priceLabel(){ $("pPriceLbl").textContent = $("pDeal").value === "rent" ? "Rent per month (USD)" : "Price (USD)"; }
+function openEditor(p){
+  editing = p || null; editPhoto = (p && p.photo) || "";
+  $("edTitle").textContent = p ? "Edit property " + p.id : "Add a property";
+  $("pTitle").value = p ? p.title : ""; $("pDeal").value = p ? p.deal : "sale"; $("pType").value = p ? p.type : "Apartment";
+  $("pArea").value = p ? p.area : ""; $("pPrice").value = p ? p.price : ""; $("pBeds").value = p ? (p.beds || 0) : 0;
+  $("pBaths").value = p ? (p.baths || 0) : 0; $("pSize").value = p ? p.size : ""; $("pDesc").value = p ? (p.desc || "") : "";
+  $("pFeats").value = p && p.features ? p.features.join(", ") : ""; $("pFeat").checked = !!(p && p.featured);
+  $("pPhoto").value = ""; $("pFormErr").textContent = ""; showPhoto(); priceLabel();
+  $("editDlg").showModal(); $("editDlg").scrollTop = 0;
+}
+$("mAdd").addEventListener("click", function(){ openEditor(null); });
+$("pDeal").addEventListener("change", priceLabel);
+$("pNoPhoto").addEventListener("click", function(){ editPhoto = ""; $("pPhoto").value = ""; showPhoto(); });
+$("pPhoto").addEventListener("change", function(){
+  var f = this.files && this.files[0]; if (!f) return;
+  if (!/^image\//.test(f.type)){ $("pFormErr").textContent = "Please choose an image file."; this.value = ""; return; }
+  var url = URL.createObjectURL(f), img = new Image();
+  img.onload = function(){
+    var k = Math.min(1, 1280 / Math.max(img.width, img.height));
+    var c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    editPhoto = c.toDataURL("image/jpeg", 0.8); URL.revokeObjectURL(url); $("pFormErr").textContent = ""; showPhoto();
+  };
+  img.onerror = function(){ URL.revokeObjectURL(url); $("pFormErr").textContent = "That photo could not be read. Try a JPG or PNG file."; };
+  img.src = url;
+});
+$("pSave").addEventListener("click", function(){
+  var title = $("pTitle").value.trim(), area = $("pArea").value.trim(), price = +$("pPrice").value, size = +$("pSize").value;
+  var bad = !title ? ["pTitle", "Enter a title for the property."] : !area ? ["pArea", "Enter the area, for example Majdalyoun."] :
+    !(price > 0) ? ["pPrice", "Enter the price in US dollars."] : !(size > 0) ? ["pSize", "Enter the size in square metres."] : null;
+  if (bad){ $("pFormErr").textContent = bad[1]; $(bad[0]).focus(); return; }
+  var p = {
+    id: editing ? editing.id : nextId(), deal: $("pDeal").value, type: $("pType").value, area: area, title: title, price: Math.round(price),
+    beds: Math.max(0, Math.round(+$("pBeds").value || 0)), baths: Math.max(0, Math.round(+$("pBaths").value || 0)), size: Math.round(size),
+    desc: $("pDesc").value.trim(), features: $("pFeats").value.split(",").map(function(s){ return s.trim(); }).filter(Boolean)
+  };
+  if ($("pFeat").checked) p.featured = true;
+  if (editPhoto) p.photo = editPhoto;
+  if (editing && editing.sample) p.sample = true;
+  var list = editing ? L.map(function(x){ return x.id === p.id ? p : x; }) : [p].concat(L);
+  $("editDlg").close();
+  commit(list, editing ? "Property updated" : "Property added");
+});
+
+/* ---------- publish: saves the list (and new photos) to the GitHub project ---------- */
+function listFile(list){ return "/* Delegate Real Estate — the published property list. */\nwindow.DELEGATE_LISTINGS = " + JSON.stringify(list, null, 1) + ";\n"; }
+function b64(text){ var bytes = new TextEncoder().encode(text), s = "", i; for (i = 0; i < bytes.length; i += 8192) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192)); return btoa(s); }
+var token = "";
+try { token = localStorage.getItem("delegate.token") || ""; } catch(e){}
+$("gTok").value = token;
+function ghCall(path, body){
+  var url = "https://api.github.com/repos/" + GH.owner + "/" + GH.repo + "/contents/" + path + (body ? "" : "?ref=" + GH.branch);
+  var opt = { headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" }, cache: "no-store" };
+  if (body){ opt.method = "PUT"; opt.body = JSON.stringify(body); }
+  return fetch(url, opt);
+}
+function fail(status){
+  var e = new Error(status === 401 ? "GitHub did not accept this token. Check that you pasted all of it and that it has not expired."
+    : (status === 403 || status === 404) ? "This token cannot write to the delegate-real-estate project. Give it Contents: Read and write for that project."
+    : status === 409 || status === 422 ? "GitHub was busy with another change. Wait a moment and publish again."
+    : "GitHub returned an error (" + status + "). Try again in a moment.");
+  return e;
+}
+async function putFile(path, content64, message){
+  var body = { message: message, content: content64, branch: GH.branch };
+  var cur = await ghCall(path);
+  if (cur.status === 200) body.sha = (await cur.json()).sha;
+  else if (cur.status !== 404) throw fail(cur.status);
+  var res = await ghCall(path, body);
+  if (!res.ok) throw fail(res.status);
+}
+var publishing = false;
+async function publish(){
+  if (publishing) return;
+  $("pErr").textContent = ""; $("pOk").textContent = "";
+  token = $("gTok").value.trim();
+  if (!token){ $("pErr").textContent = "Paste your GitHub access token first."; $("gTok").focus(); return; }
+  publishing = true; $("mPublish").disabled = true; $("mPublish").textContent = "Publishing…";
+  try {
+    var probe = await ghCall("listings.js");
+    if (probe.status !== 200) throw fail(probe.status);
+    var list = JSON.parse(JSON.stringify(L)), i, p, stamp = Date.now().toString(36);
+    for (i = 0; i < list.length; i++){
+      p = list[i];
+      if (p.photo && p.photo.indexOf("data:") === 0){
+        $("mPublish").textContent = "Uploading photo " + p.id + "…";
+        var path = "photos/" + p.id + "-" + stamp + ".jpg";
+        await putFile(path, p.photo.slice(p.photo.indexOf(",") + 1), "Add photo for " + p.id);
+        p.photo = path;
+      }
+    }
+    $("mPublish").textContent = "Saving the list…";
+    await putFile("listings.js", b64(listFile(list)), "Update listings");
+    try { localStorage.setItem("delegate.token", token); localStorage.removeItem("delegate.draft"); } catch(e){}
+    PUBLISHED = list; draft = null;
+    /* keep showing the photos already in memory until the site has refreshed */
+    $("pOk").textContent = "Published. Visitors will see the new list within a few minutes.";
+    renderAll();
+  } catch(err){
+    $("pErr").textContent = (err instanceof TypeError || !err || !err.message) ? "Could not reach GitHub. Check your internet connection and try again." : err.message;
+  }
+  publishing = false; $("mPublish").disabled = false; $("mPublish").textContent = "Publish now";
+}
+$("mPublish").addEventListener("click", publish);
+$("mForget").addEventListener("click", function(){
+  try { localStorage.removeItem("delegate.token"); } catch(e){}
+  token = ""; $("gTok").value = ""; toast("Token removed from this device");
+});
+$("mDownload").addEventListener("click", function(){
+  try {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([listFile(L)], { type: "text/javascript" })); a.download = "listings.js";
+    document.body.appendChild(a); a.click(); a.remove(); toast("List file downloaded");
+  } catch(e){ toast("Download is not available here"); }
+});
+/* five quick taps on the copyright line open the owner area (for the installed app) */
+var taps = 0, tapT;
+$("copyLine").addEventListener("click", function(){ taps++; clearTimeout(tapT); tapT = setTimeout(function(){ taps = 0; }, 1500); if (taps >= 5){ taps = 0; go("manage"); } });
 
 /* ---------- start ---------- */
 $("yr").textContent = new Date().getFullYear();
