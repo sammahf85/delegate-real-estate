@@ -1,0 +1,16 @@
+{
+  "name": "Delegate Real Estate",
+  "short_name": "Delegate",
+  "description": "Properties for sale and rent in Sidon and South Lebanon.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000912",
+  "theme_color": "#000912",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
