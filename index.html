@@ -843,6 +843,9 @@ function install(){
 $("installBtn").addEventListener("click", install);
 $("installTop").addEventListener("click", install);
 if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
+  /* when an update takes over, reload once so the newest version shows */
+  var hadWorker = !!navigator.serviceWorker.controller, reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", function(){ if (hadWorker && !reloaded){ reloaded = true; location.reload(); } });
   window.addEventListener("load", function(){ try { navigator.serviceWorker.register("sw.js").catch(function(){}); } catch(e){} });
 }
 
