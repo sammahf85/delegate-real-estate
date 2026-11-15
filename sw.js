@@ -1,6 +1,6 @@
 /* Delegate Real Estate — offline support.
    Online: always the newest files. Offline: the last saved copy. */
-const CACHE = "delegate-v4";
+const CACHE = "delegate-v5";
 const SHELL = ["./", "index.html", "demo-listings.js", "listings.js", "logo.jpg", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "manifest.webmanifest"];
 
 self.addEventListener("install", (e) => {
@@ -18,14 +18,15 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
+  const key = req.url.split("?")[0];
   e.respondWith(
     caches.open(CACHE).then(async (cache) => {
       try {
         const res = await fetch(req.url, { cache: "no-cache" });
-        if (res && res.ok) cache.put(req, res.clone());
+        if (res && res.ok) cache.put(key, res.clone());
         return res;
       } catch (err) {
-        return (await cache.match(req, { ignoreSearch: true })) || Response.error();
+        return (await cache.match(key)) || Response.error();
       }
     })
   );

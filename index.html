@@ -845,8 +845,18 @@ $("installTop").addEventListener("click", install);
 if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
   /* when an update takes over, reload once so the newest version shows */
   var hadWorker = !!navigator.serviceWorker.controller, reloaded = false;
-  navigator.serviceWorker.addEventListener("controllerchange", function(){ if (hadWorker && !reloaded){ reloaded = true; location.reload(); } });
-  window.addEventListener("load", function(){ try { navigator.serviceWorker.register("sw.js").catch(function(){}); } catch(e){} });
+  /* reload once a new version takes over, but never while a form or property is open */
+  var safeReload = function(){ if (document.querySelector("dialog[open]")) { setTimeout(safeReload, 2000); } else { location.reload(); } };
+  navigator.serviceWorker.addEventListener("controllerchange", function(){ if (hadWorker && !reloaded){ reloaded = true; safeReload(); } });
+  window.addEventListener("load", function(){
+    try {
+      navigator.serviceWorker.register("sw.js").then(function(reg){
+        /* look for a new version every minute and each time the app is reopened */
+        setInterval(function(){ reg.update().catch(function(){}); }, 60000);
+        document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible") reg.update().catch(function(){}); });
+      }).catch(function(){});
+    } catch(e){}
+  });
 }
 
 /* ---------- manage listings (owner area) ---------- */
@@ -1014,7 +1024,7 @@ async function publish(){
     $("mPublish").textContent = "Saving the list…";
     await putFile("listings.js", b64(listFile(list)), "Update listings");
     try { localStorage.setItem("delegate.token", token); localStorage.removeItem("delegate.draft"); } catch(e){}
-    PUBLISHED = list; draft = null;
+    PUBLISHED = list; draft = null; pendingPub = JSON.stringify(list); pendingAt = Date.now();
     /* keep showing the photos already in memory until the site has refreshed */
     $("pOk").textContent = "Published. Visitors will see the new list within a few minutes.";
     renderAll();
@@ -1038,6 +1048,37 @@ $("mDownload").addEventListener("click", function(){
 /* five quick taps on the copyright line open the owner area (for the installed app) */
 var taps = 0, tapT;
 $("copyLine").addEventListener("click", function(){ taps++; clearTimeout(tapT); tapT = setTimeout(function(){ taps = 0; }, 1500); if (taps >= 5){ taps = 0; go("manage"); } });
+
+/* ---------- live listings: new properties appear in the installed app on their own ---------- */
+var pendingPub = null, pendingAt = 0, lastListText = "";
+function parseList(text){
+  if (text.indexOf("DELEGATE_DEMO ||") > -1) return DEMO.slice();
+  var a = text.indexOf("["), b = text.lastIndexOf("]");
+  if (a < 0 || b < a) return null;
+  try { var list = JSON.parse(text.slice(a, b + 1)); return Array.isArray(list) ? list : null; } catch(e){ return null; }
+}
+function refreshListings(){
+  if (!/^https?:$/.test(location.protocol) || draft) return;
+  fetch("listings.js?t=" + Date.now(), { cache: "no-store" }).then(function(r){ return r.ok ? r.text() : null; }).then(function(text){
+    if (!text || text === lastListText || draft) return;
+    var list = parseList(text); if (!list) return;
+    var json = JSON.stringify(list);
+    if (pendingPub){
+      if (json === pendingPub) pendingPub = null;
+      else if (Date.now() - pendingAt < 15 * 60000) return; /* the site has not caught up with the last publish yet */
+      else pendingPub = null;
+    }
+    lastListText = text;
+    if (json === JSON.stringify(PUBLISHED)) return;
+    PUBLISHED = list; L = list.slice();
+    if (!L.some(function(p){ return p.area === F.area; })) F.area = "";
+    fillSelects(); syncFilterUI(); renderAll();
+    toast("Listings updated");
+  }).catch(function(){});
+}
+setInterval(function(){ if (document.visibilityState === "visible") refreshListings(); }, 60000);
+document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible") refreshListings(); });
+setTimeout(refreshListings, 4000);
 
 /* ---------- start ---------- */
 $("yr").textContent = new Date().getFullYear();
