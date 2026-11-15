@@ -1,7 +1,7 @@
 {
   "name": "Delegate Real Estate",
   "short_name": "Delegate Real Estate",
-  "description": "Properties for sale and rent in Sidon and South Lebanon.",
+  "description": "Properties for sale and rent across all of Lebanon.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

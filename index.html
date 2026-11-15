@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Delegate Real Estate</title>
-<meta name="description" content="Delegate Real Estate. Properties for sale and rent in Sidon and South Lebanon. Majdalyoun, Sidon, Lebanon.">
+<meta name="description" content="Delegate Real Estate. Properties for sale and rent across all of Lebanon. Office in Majdalyoun, Sidon.">
 <meta name="theme-color" content="#000912">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Delegate Real Estate">
-<meta property="og:description" content="Properties for sale and rent in Sidon and South Lebanon.">
+<meta property="og:description" content="Properties for sale and rent across all of Lebanon.">
 <meta property="og:image" content="logo.jpg">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
@@ -263,7 +263,7 @@ footer{margin-top:36px;padding:20px 0 0;border-top:1px solid var(--line);color:v
         <img class="logo" src="logo.jpg" alt="Delegate Real Estate logo" width="720" height="720">
         <p class="eyebrow">Majdalyoun · Sidon · Lebanon</p>
         <h1>Delegate the search.<br>We handle the rest.</h1>
-        <p>Homes, land and commercial property for sale and rent across Sidon and South Lebanon.</p>
+        <p>Homes, land and commercial property for sale and rent across all of Lebanon, from Beirut and Mount Lebanon to the North, the South and the Bekaa.</p>
         <form class="searchbar" id="homeSearch" role="search">
           <input class="field" id="homeQ" type="search" placeholder="Area or property type" aria-label="Search properties">
           <button class="btn" type="submit">Search</button>
@@ -392,7 +392,7 @@ footer{margin-top:36px;padding:20px 0 0;border-top:1px solid var(--line);color:v
       <div class="two">
         <div class="panel contact-card">
           <img src="logo.jpg" alt="Delegate Real Estate" width="720" height="720">
-          <p class="muted">Your property partner in Sidon and South Lebanon.</p>
+          <p class="muted">Your property partner across all of Lebanon.</p>
           <div class="clist">
             <a class="citem" href="tel:+9613756468" id="cCall"><span><small>Call</small><b>+961 3 756 468</b></span></a>
             <a class="citem" href="https://wa.me/9613756468" target="_blank" rel="noopener" id="cWa"><span><small>WhatsApp</small><b>+961 3 756 468</b></span></a>
@@ -742,7 +742,7 @@ function openDetail(id){
     '<div class="art">' + media(p) + tags(p) + '</div>' +
     '<div class="d-body">' +
       '<div><div class="price" style="font-size:1.5rem">' + priceHTML(p) + '</div><h2 id="dTitle">' + esc(p.title) + '</h2>' +
-      '<div class="where" style="margin-top:6px">' + ico("pin") + esc(p.area) + ', South Lebanon · Ref ' + esc(p.id) + '</div></div>' +
+      '<div class="where" style="margin-top:6px">' + ico("pin") + esc(p.area) + ', Lebanon · Ref ' + esc(p.id) + '</div></div>' +
       '<div class="specs" style="margin:0">' + specs(p) + '</div>' +
       '<p class="muted">' + esc(p.desc || "") + '</p>' +
       (p.features && p.features.length ? '<ul class="feats">' + p.features.map(function(f){ return '<li>' + esc(f) + '</li>'; }).join("") + '</ul>' : '') +
@@ -783,7 +783,7 @@ document.addEventListener("click", function(e){
   } else if (t.hasAttribute("data-interest")){ $("eInterest").value = t.getAttribute("data-interest"); updateEnquiry(); go("contact");
   } else if (t.hasAttribute("data-copy")){
     var p = L.filter(function(x){ return x.id === t.getAttribute("data-copy"); })[0];
-    copy(p.title + " (Ref " + p.id + ")\n" + p.area + ", South Lebanon\n" + money(p.price) + (p.deal === "rent" ? " per month" : "") + "\nDelegate Real Estate " + PHONE_TXT, "Details copied");
+    copy(p.title + " (Ref " + p.id + ")\n" + p.area + ", Lebanon\n" + money(p.price) + (p.deal === "rent" ? " per month" : "") + "\nDelegate Real Estate " + PHONE_TXT, "Details copied");
   } else if (t.hasAttribute("data-go")){
     var g = t.getAttribute("data-go");
     if ($("detail").open) $("detail").close();
